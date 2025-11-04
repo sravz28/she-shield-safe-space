@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Download, Shield } from "lucide-react";
+import { Download, Shield, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Hero = () => {
@@ -27,13 +28,26 @@ const Hero = () => {
               Empowering Women with Smart Safety Technology
             </p>
             
-            <Button 
-              size="lg" 
-              className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Download APK
-            </Button>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download APK
+              </Button>
+              
+              <Link to="/auth">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <LogIn className="w-5 h-5 mr-2" />
+                  Sign In / Sign Up
+                </Button>
+              </Link>
+            </div>
           </div>
           
           <div className="relative animate-scale-in">
