@@ -32,9 +32,13 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                onClick={() => {
+                  const element = document.getElementById('features');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
                 <Download className="w-5 h-5 mr-2" />
-                Download APK
+                Explore Features
               </Button>
               
               <Link to="/auth">
@@ -61,11 +65,17 @@ const Hero = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+      <button 
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer"
+        onClick={() => {
+          const element = document.getElementById('about');
+          element?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      >
         <div className="w-6 h-10 border-2 border-white/50 rounded-full flex items-start justify-center p-2">
           <div className="w-1.5 h-3 bg-white/70 rounded-full"></div>
         </div>
-      </div>
+      </button>
     </section>
   );
 };
