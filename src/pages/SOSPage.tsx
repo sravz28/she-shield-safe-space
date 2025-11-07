@@ -113,9 +113,32 @@ const SOSPageContent = () => {
 
       if (contactsError) throw contactsError;
 
-      // Simulate sending alerts (in real app, this would call an edge function)
+      // Trigger voice calls to emergency contacts
       if (contacts && contacts.length > 0) {
-        toast.success(`SOS alert sent to ${contacts.length} contact(s)`);
+        const locationString = latitude && longitude 
+          ? `${latitude}, ${longitude}` 
+          : undefined;
+
+        // Call each contact
+        const callPromises = contacts.map(async (contact) => {
+          try {
+            const { error } = await supabase.functions.invoke('twilio-voice-call', {
+              body: {
+                phoneNumber: contact.phone_number,
+                contactName: contact.name,
+                userLocation: locationString,
+              }
+            });
+            
+            if (error) throw error;
+            console.log(`Call initiated to ${contact.name}`);
+          } catch (err) {
+            console.error(`Failed to call ${contact.name}:`, err);
+          }
+        });
+
+        await Promise.all(callPromises);
+        toast.success(`Emergency calls initiated to ${contacts.length} contact(s)`);
       } else {
         toast.warning('No emergency contacts configured');
       }

@@ -1,1 +1,4 @@
 project_id = "zoxiwggfywfjrybsuxnm"
+
+[functions.twilio-voice-call]
+verify_jwt = false
