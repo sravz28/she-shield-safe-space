@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import EmergencyContacts from "./pages/EmergencyContacts";
 import LiveLocation from "./pages/LiveLocation";
 import SOSPage from "./pages/SOSPage";
+import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/contacts" element={<EmergencyContacts />} />
             <Route path="/location" element={<LiveLocation />} />
             <Route path="/sos" element={<SOSPage />} />
+            <Route path="/install" element={<InstallApp />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -29,17 +29,15 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                onClick={() => {
-                  const element = document.getElementById('features');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Explore Features
-              </Button>
+              <Link to="/install">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Install App
+                </Button>
+              </Link>
               
               <Link to="/auth">
                 <Button 
