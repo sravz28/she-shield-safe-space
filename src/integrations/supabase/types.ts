@@ -92,6 +92,33 @@ export type Database = {
         }
         Relationships: []
       }
+      retry_settings: {
+        Row: {
+          created_at: string
+          id: string
+          max_retry_attempts: number
+          retry_interval_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_retry_attempts?: number
+          retry_interval_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_retry_attempts?: number
+          retry_interval_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sos_alerts: {
         Row: {
           created_at: string | null
@@ -121,6 +148,60 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sos_call_logs: {
+        Row: {
+          attempt_number: number
+          call_sid: string | null
+          contact_id: string | null
+          contact_name: string
+          created_at: string
+          id: string
+          phone_number: string
+          sos_alert_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_number?: number
+          call_sid?: string | null
+          contact_id?: string | null
+          contact_name: string
+          created_at?: string
+          id?: string
+          phone_number: string
+          sos_alert_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_number?: number
+          call_sid?: string | null
+          contact_id?: string | null
+          contact_name?: string
+          created_at?: string
+          id?: string
+          phone_number?: string
+          sos_alert_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sos_call_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "emergency_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_call_logs_sos_alert_id_fkey"
+            columns: ["sos_alert_id"]
+            isOneToOne: false
+            referencedRelation: "sos_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -113,20 +113,60 @@ const SOSPageContent = () => {
 
       if (contactsError) throw contactsError;
 
+      // Get or create retry settings
+      let retrySettings = null;
+      const { data: existingSettings } = await supabase
+        .from('retry_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingSettings) {
+        retrySettings = existingSettings;
+      } else {
+        // Create default retry settings
+        const { data: newSettings } = await supabase
+          .from('retry_settings')
+          .insert({
+            user_id: user.id,
+            max_retry_attempts: 3,
+            retry_interval_minutes: 2,
+          })
+          .select()
+          .single();
+        retrySettings = newSettings;
+      }
+
+      // Get the SOS alert ID we just created
+      const { data: alertData } = await supabase
+        .from('sos_alerts')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const sosAlertId = alertData?.id;
+
       // Trigger voice calls to emergency contacts
-      if (contacts && contacts.length > 0) {
+      if (contacts && contacts.length > 0 && sosAlertId) {
         const locationString = latitude && longitude 
           ? `${latitude}, ${longitude}` 
           : undefined;
 
-        // Call each contact
+        // Call each contact with retry configuration
         const callPromises = contacts.map(async (contact) => {
           try {
             const { error } = await supabase.functions.invoke('twilio-voice-call', {
               body: {
                 phoneNumber: contact.phone_number,
                 contactName: contact.name,
+                contactId: contact.id,
+                sosAlertId: sosAlertId,
                 userLocation: locationString,
+                attemptNumber: 1,
+                maxRetries: retrySettings?.max_retry_attempts || 3,
+                retryIntervalMinutes: retrySettings?.retry_interval_minutes || 2,
               }
             });
             
@@ -138,7 +178,10 @@ const SOSPageContent = () => {
         });
 
         await Promise.all(callPromises);
-        toast.success(`Emergency calls initiated to ${contacts.length} contact(s)`);
+        toast.success(
+          `Emergency calls initiated to ${contacts.length} contact(s). ` +
+          `Will retry up to ${retrySettings?.max_retry_attempts || 3} times if unanswered.`
+        );
       } else {
         toast.warning('No emergency contacts configured');
       }
