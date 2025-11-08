@@ -95,14 +95,16 @@ const SOSPageContent = () => {
       }
 
       // Save SOS alert
-      const { error: sosError } = await supabase
+      const { data: alertData, error: sosError } = await supabase
         .from('sos_alerts')
         .insert({
           user_id: user.id,
           latitude,
           longitude,
           trigger_type: triggerType,
-        });
+        })
+        .select()
+        .single();
 
       if (sosError) throw sosError;
 
@@ -114,37 +116,27 @@ const SOSPageContent = () => {
       if (contactsError) throw contactsError;
 
       // Get or create retry settings
-      let retrySettings = null;
       const { data: existingSettings } = await supabase
         .from('retry_settings')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (existingSettings) {
-        retrySettings = existingSettings;
-      } else {
-        // Create default retry settings
-        const { data: newSettings } = await supabase
+      const retrySettings = existingSettings || {
+        max_retry_attempts: 3,
+        retry_interval_minutes: 2,
+      };
+
+      // If no settings exist, create them
+      if (!existingSettings) {
+        await supabase
           .from('retry_settings')
           .insert({
             user_id: user.id,
             max_retry_attempts: 3,
             retry_interval_minutes: 2,
-          })
-          .select()
-          .single();
-        retrySettings = newSettings;
+          });
       }
-
-      // Get the SOS alert ID we just created
-      const { data: alertData } = await supabase
-        .from('sos_alerts')
-        .select('id')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
 
       const sosAlertId = alertData?.id;
 
@@ -154,7 +146,7 @@ const SOSPageContent = () => {
           ? `${latitude}, ${longitude}` 
           : undefined;
 
-        // Call each contact with retry configuration
+        // Call each contact with retry support
         const callPromises = contacts.map(async (contact) => {
           try {
             const { error } = await supabase.functions.invoke('twilio-voice-call', {
@@ -165,13 +157,12 @@ const SOSPageContent = () => {
                 sosAlertId: sosAlertId,
                 userLocation: locationString,
                 attemptNumber: 1,
-                maxRetries: retrySettings?.max_retry_attempts || 3,
-                retryIntervalMinutes: retrySettings?.retry_interval_minutes || 2,
+                userId: user.id,
               }
             });
             
             if (error) throw error;
-            console.log(`Call initiated to ${contact.name}`);
+            console.log(`Call initiated to ${contact.name} with retry support`);
           } catch (err) {
             console.error(`Failed to call ${contact.name}:`, err);
           }
@@ -180,7 +171,7 @@ const SOSPageContent = () => {
         await Promise.all(callPromises);
         toast.success(
           `Emergency calls initiated to ${contacts.length} contact(s). ` +
-          `Will retry up to ${retrySettings?.max_retry_attempts || 3} times if unanswered.`
+          `Will retry up to ${retrySettings.max_retry_attempts} times if unanswered.`
         );
       } else {
         toast.warning('No emergency contacts configured');
